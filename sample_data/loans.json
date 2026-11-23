@@ -1,0 +1,64 @@
+{
+  "accounts": [
+    {
+      "account_id": "L-P002",
+      "policy_id": "P002",
+      "currency": "CNY",
+      "cash_value_current": "11800.00",
+      "cash_value_retro": "11800.00",
+      "loan_principal": "12000.00",
+      "loan_interest_due": "860.50",
+      "unpaid_premium": "1380.00",
+      "note": "追溯减保后现金价值低于未还贷款"
+    },
+    {
+      "account_id": "L-P009",
+      "policy_id": "P009",
+      "currency": "CNY",
+      "cash_value_current": "9000.00",
+      "cash_value_retro": "8750.00",
+      "loan_principal": "9400.00",
+      "loan_interest_due": "412.00",
+      "unpaid_premium": "600.00",
+      "note": "现金价值与追溯版本未对平，禁止入账与结案"
+    }
+  ],
+  "endorsements": [
+    {
+      "account_id": "L-P002",
+      "endorsement_id": "E-P002-RETRO-01",
+      "kind": "retro_reduce",
+      "effective": "2026-10-01",
+      "recorded_at": "2026-11-18T03:12:00+08:00",
+      "cash_value_before": "15200.00",
+      "cash_value_after": "11800.00",
+      "note": "追溯减保批单，仅追加不覆盖"
+    },
+    {
+      "account_id": "L-P009",
+      "endorsement_id": "E-P009-RETRO-01",
+      "kind": "retro_reduce",
+      "effective": "2026-10-01",
+      "recorded_at": "2026-11-18T03:12:00+08:00",
+      "cash_value_before": "12100.00",
+      "cash_value_after": "8750.00",
+      "note": "追溯版本与当前账户未对平"
+    }
+  ],
+  "payments": [
+    {
+      "account_id": "L-P002",
+      "payment_id": "PAY-20261120-0001",
+      "received_at": "2026-11-20T10:00:00+08:00",
+      "amount": "3000.00",
+      "note": "客户补款第一笔，部分还款"
+    },
+    {
+      "account_id": "L-P002",
+      "payment_id": "PAY-20261122-0002",
+      "received_at": "2026-11-22T14:30:00+08:00",
+      "amount": "11420.50",
+      "note": "客户补款第二笔，结清贷款并结案退款"
+    }
+  ]
+}

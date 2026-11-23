@@ -19,6 +19,11 @@ docker compose up --build -d
 - 保费重算：`/m5_calculate`、`/api/m5_calculate`
 - 补退对账：`/m6_reconcile`、`/api/m6_reconcile`
 - 结案归档：`/m7_archive`、`/api/m7_archive`
+- 贷款还款裁决：`/m8_loan`、`/api/m8_loan/accounts`
+
+## 贷款还款唯一去向
+
+还款按固定瀑布冲抵：**欠息 → 贷款本金 → 抵作欠交保费 → 退还客户**（《民法典》第561条），禁止先本后息。现金价值当前版与追溯版未对平时，入账与结案下载一律拒绝；同一还款流水重跑幂等不重复入账；台账只追加，账户条件换版失败整体回滚保留旧版；复核页面与结案CSV共用同一份台账数字。
 
 ## 核心规则
 

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block loan_kpis %}
+{% if data %}
+<div class="kpis">
+  <div class="kpi"><label>当前现金价值</label><b>{{data.cash_value_check.current}}</b></div>
+  <div class="kpi"><label>追溯现金价值</label><b>{{data.cash_value_check.retro}}</b></div>
+  <div class="kpi"><label>对平状态</label><b class="{{'bad' if not data.cash_value_check.matched else ''}}">{{'已对平' if data.cash_value_check.matched else '未对平'}}</b></div>
+  <div class="kpi"><label>贷款状态</label><b>{{data.loan_status_label}}</b></div>
+  <div class="kpi"><label>结案</label><b class="{{'bad' if not data.closable else ''}}">{{'可结案' if data.closable else '不可结案'}}</b></div>
+</div>
+{% endif %}
+{% endblock %}
+{% block content %}
+{% if not data %}
+<section class="panel wide"><header><h2>暂无贷款账户</h2></header><p class="rule-note">种子数据缺失或被重置，请通过建档接口开立贷款账户后再进行还款裁决。</p></section>
+{% else %}
+<div class="document-grid">
+  <section class="panel">
+    <header><h2>账户选择</h2></header>
+    <form id="pick">
+      <select id="account_id" onchange="window.location.href='/m8_loan?account_id='+this.value">
+        {% for a in accounts %}<option value="{{a.account_id}}" {{'selected' if a.account_id==selected else ''}}>{{a.account_id}}（REV {{a.version}}）</option>{% endfor %}
+      </select>
+    </form>
+    <dl>
+      <dt>保单</dt><dd>{{data.account.policy_id}}</dd>
+      <dt>贷款本金</dt><dd>{{data.account.loan_principal}}</dd>
+      <dt>欠息</dt><dd>{{data.account.loan_interest_due}}</dd>
+      <dt>欠交保费</dt><dd>{{data.account.unpaid_premium}}</dd>
+      <dt>账户版本</dt><dd>REV {{data.account.version}}</dd>
+    </dl>
+  </section>
+
+  <section class="panel">
+    <header><h2>唯一去向裁决</h2><span>欠息→本金→抵费→退还</span></header>
+    <p class="rule-note">依据《民法典》第五百六十一条，还款先冲抵应付利息，再冲减本金，再抵作欠交保费，剩余方可退还。禁止先本后息。</p>
+    <form id="pay-form">
+      <label>还款流水号<input id="payment_id" required placeholder="PAY-YYYYMMDD-序号"></label>
+      <label>到账金额 CNY<input id="amount" inputmode="decimal" required placeholder="0.00"></label>
+      <label>到账时间（可选）<input id="received_at" placeholder="留空取当前UTC"></label>
+      <button class="primary" type="submit">提交入账</button>
+    </form>
+    <div class="stamp {{'bad' if not data.cash_value_check.matched else ''}}">{{'对平闸门未过，入账与结案均被拦截' if not data.cash_value_check.matched else '对平闸门通过'}}</div>
+  </section>
+
+  <section class="panel wide">
+    <header><h2>贷款本息台账（复核页与结案下载同一份数字）</h2><span>{{data.payments|length}} 笔还款</span></header>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>还款流水</th><th>到账</th><th>冲抵欠息</th><th>压减本金</th><th>抵作保费</th><th>退还客户</th><th>剩余欠息</th><th>剩余本金</th><th>欠交保费</th><th>状态</th></tr></thead>
+        <tbody>
+        {% for e in data.payments %}
+          <tr><td>{{e.payment_id}}</td><td class="num">{{e.received}}</td><td class="num">{{e.interest_paid}}</td><td class="num">{{e.principal_paid}}</td><td class="num">{{e.premium_offset}}</td><td class="num">{{e.refund}}</td><td class="num">{{e.remaining_interest}}</td><td class="num">{{e.remaining_principal}}</td><td class="num">{{e.remaining_premium}}</td><td>{{e.loan_status_label}}</td></tr>
+        {% else %}
+          <tr><td colspan="10">暂无还款台账</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="actions">
+      <a class="button {{'primary' if data.closable else ''}}" href="/api/m8_loan/accounts/{{selected}}/export.csv">下载结案证据 CSV</a>
+      <a class="button" href="/api/m8_loan/accounts/{{selected}}/replay">台账重放校验</a>
+      <span class="hash">SHA256 {{data.sha256}}</span>
+    </div>
+  </section>
+
+  <section class="panel evidence">
+    <header><h2>批改记录（只追加，永不覆盖）</h2><span>{{data.endorsements|length}} 条</span></header>
+    <div class="scroll">
+      <table><thead><tr><th>流水</th><th>类型</th><th>生效日</th><th>记录时间</th></tr></thead><tbody>
+      {% for e in data.endorsements %}<tr><td>{{e.endorsement_id}}</td><td>{{e.kind}}</td><td>{{e.effective}}</td><td>{{e.recorded_at}}</td></tr>{% endfor %}
+      </tbody></table>
+    </div>
+  </section>
+</div>
+<script src="/static/loan.js" defer></script>
+{% endif %}
+{% endblock %}
